@@ -1,0 +1,44 @@
+version : '3.7'
+
+services:
+    app_web:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: rvtools_app_web
+        volumes:
+            - .:/project
+        #depends_on:
+        #    - database_web
+        #networks:
+        #    - app_network
+        
+        ##1)server flask
+        command: tail -f /dev/null  ## avoid exited code 0 - the conteneur always run for dev
+        ports:
+            - "5000:5000"
+        environment: 
+            - PORT= 5000
+                
+        ##2)server gunicorn
+        #command: gunicorn app:server
+
+    #database_web:
+    #    image: postgres
+    #    container_name: car-app_db
+    #    environment:
+    #        - POSTGRES_PASSWORD=aro
+    #        - POSTGRES_DB=dbCAR
+    #    volumes:  # Ensure the duplicability of the database on the host folder (especially when dump)
+    #        - ./data_sql/dbCAR.sql:/docker-entrypoint-initdb.d/dbCAR.sql
+    #    networks:
+    #        - app_network
+
+#networks:      
+#    app_network:
+#        name: car-app_net
+#        driver: bridge
+
+
+## docker exec -it car-app_web bash
+## docker-compose exec app_web bash

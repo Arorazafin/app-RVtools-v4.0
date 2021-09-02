@@ -1,0 +1,17 @@
+#dash
+dash
+dash-bootstrap-components
+dash-auth
+
+#standard tools
+pandas
+
+#DB & postegres
+psycopg2-binary
+SQLAlchemy
+
+#server
+gunicorn
+
+#env
+python-dotenv
