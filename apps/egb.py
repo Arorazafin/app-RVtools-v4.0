@@ -90,7 +90,7 @@ vol_30y = .50
 df_fr = datelist.copy()
 df_fr['BTNS 2y'] =  pd.DataFrame(np.random.randn(size) * sqrt(vol_2y) * sqrt(1 / 252.)).cumsum()
 df_fr['BTNS 5y'] = pd.DataFrame(np.random.randn(size) * sqrt(vol_5y) * sqrt(1 / 252.)).cumsum()
-df_fr['FTRT 10y'] = pd.DataFrame(np.random.randn(size) * sqrt(vol_10y) * sqrt(1 / 252.)).cumsum()
+df_fr['FRTR 10y'] = pd.DataFrame(np.random.randn(size) * sqrt(vol_10y) * sqrt(1 / 252.)).cumsum()
 df_fr['FRTR 15y'] = pd.DataFrame(np.random.randn(size) * sqrt(vol_15y) * sqrt(1 / 252.)).cumsum()
 df_fr['FRTR 30y'] = pd.DataFrame(np.random.randn(size) * sqrt(vol_30y) * sqrt(1 / 252.)).cumsum()
 df_fr.set_index(0, inplace = True)
@@ -120,6 +120,12 @@ ctry_bond ['FR'] = df_fr.columns
 ctry_bond ['GE'] = df_ge.columns
 ctry_bond ['IT'] = df_it.columns
 
+df_dic = dict()
+df_dic ['FR'] = df_fr
+df_dic ['GE'] = df_ge
+df_dic ['IT'] = df_it
+
+
 print(ctry_bond)
 
 
@@ -129,11 +135,11 @@ def trade_graph(df1,df2):
 
     fig1.add_trace(go.Scatter(x=df1.index, y=df1,
                     mode='lines',
-                    name='1'))
+                    name='Sell'))
     
     fig1.add_trace(go.Scatter(x=df2.index, y=df2,
                 mode='lines',
-                name='2'))
+                name='Buy'))
     
     fig1.update_layout(
         legend=dict(
@@ -169,6 +175,55 @@ def trade_graph(df1,df2):
 
     return res
 
+def box_graph(df1,df2, df3, df4):
+
+    dfbox1 = df2-df1
+    dfbox2 = df4-df3
+    dfbox = dfbox1 + dfbox2
+
+    fig1 = go.Figure()
+
+    fig1.add_trace(go.Scatter(x=dfbox1.index, y=dfbox1,
+                    mode='lines',
+                    name='trade1'))
+    
+    fig1.add_trace(go.Scatter(x=dfbox2.index, y=dfbox2,
+                mode='lines',
+                name='trade2'))
+    
+    fig1.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.3,
+            xanchor="right",
+            x=1
+        )
+    )
+    fig1.update_layout(title_text='spread ASW')
+    fig1.update_layout(title_x=0.5)
+    
+
+    fig2 = go.Figure()
+    fig2.add_trace(go.Scatter(x=dfbox.index, y=dfbox,
+                mode='lines',
+                name='box trade'))
+    fig2.update_layout(title_text='Box trade')
+    fig2.update_layout(title_x=0.5)
+    
+
+    dcc_graph1 = dcc.Graph(figure = fig1)
+    dcc_graph2 = dcc.Graph(figure = fig2)
+
+
+    res = dict()
+    res ={
+            'dcc_spread' : dcc_graph1,
+            'dcc_box': dcc_graph2,
+    }
+
+    return res
+
 
 
 layout = dbc.Container(
@@ -182,7 +237,8 @@ layout = dbc.Container(
   
             dbc.Tabs(
             [
-                dbc.Tab(label="RV", tab_id="asw_id"),
+                dbc.Tab(label="RV", tab_id="rv_id"),
+                dbc.Tab(label="ASW Curve", tab_id="aswCurve_id"),
                 dbc.Tab(label="Carry Roll-Down", tab_id="c&r_id"),
                 dbc.Tab(label="Issuance", tab_id="issuance_id"),
                 dbc.Tab(label="Rating", tab_id="rating_id"),
@@ -213,7 +269,7 @@ def render_tab_content(active_tab):
     """
     if active_tab is not None:
         
-        if active_tab == "asw_id":
+        if active_tab == "rv_id":
             
             chld = [
                 #html.P(),
@@ -225,10 +281,10 @@ def render_tab_content(active_tab):
                                 dbc.Col ([
                                     dcc.Dropdown(
                                         id='dd-ctry-1s-id',
-                                        #options=[
-                                        #    {'label': i, 'value': i} for i in ctry
-                                        #],
-                                        #value='FR',
+                                        options=[
+                                            {'label': i, 'value': i} for i in ctry
+                                        ],
+                                        value='FR',
                                         clearable = False,
                                     ),
                                 ],xs=12, sm=12, md=12, lg=3, xl=3),
@@ -236,10 +292,10 @@ def render_tab_content(active_tab):
                                 dbc.Col([
                                     dcc.Dropdown(
                                         id='dd-bond-1s-id',
-                                        #options=[
-                                        #    {'label': i, 'value': i} for i in ctry_bond['FR']
-                                        #],
-                                        #value='',
+                                        options=[
+                                            {'label': i, 'value': i} for i in ctry_bond['FR']
+                                        ],
+                                        value=ctry_bond['FR'][0],
                                         clearable = False,
                                     )
                                 ],xs=12, sm=12, md=12, lg=9, xl=9),
@@ -249,29 +305,29 @@ def render_tab_content(active_tab):
                                 dbc.Col ([
                                     dcc.Dropdown(
                                     id='dd-ctry-1b-id',
-                                    #options=[
-                                    #    {'label': i, 'value': i} for i in ctry
-                                    #],
-                                    #value='FR',
+                                    options=[
+                                        {'label': i, 'value': i} for i in ctry
+                                    ],
+                                    value='FR',
                                     clearable = False,
                                     ),
                                 ],xs=12, sm=12, md=12, lg=3, xl=3),
                                 dbc.Col([
                                     dcc.Dropdown(
                                     id='dd-bond-1b-id',
-                                    #options=[
-                                    #    {'label': i, 'value': i} for i in ctry_bond['FR']
-                                    #],
-                                    #value='',
+                                    options=[
+                                        {'label': i, 'value': i} for i in ctry_bond['FR']
+                                    ],
+                                    value=ctry_bond['FR'][1],
                                     clearable = False,
                                     )
                                 ],xs=12, sm=12, md=12, lg=9, xl=9),
                             ]),
 
-                            dbc.Col(trade_graph(df_fr['BTNS 2y'],df_ge['BKO 2y'])['dcc_asw']
-                            ),
-                            dbc.Col(trade_graph(df_fr['BTNS 2y'],df_ge['BKO 2y'])['dcc_spread']
-                            ),
+                            #dbc.Col(trade_graph(df_fr['BTNS 2y'],df_ge['BKO 2y'])['dcc_asw']),
+                            #dbc.Col(trade_graph(df_fr['BTNS 2y'],df_ge['BKO 2y'])['dcc_spread']),
+                            dbc.Col(id="graph1-trade1-id"),
+                            dbc.Col(id="graph2-trade1-id")
 
 
 
@@ -287,7 +343,7 @@ def render_tab_content(active_tab):
                                         options=[
                                             {'label': i, 'value': i} for i in ctry
                                         ],
-                                        value='FR',
+                                        value='GE',
                                         clearable = False,
                                     ),
                                 ],xs=12, sm=12, md=12, lg=3, xl=3),
@@ -296,9 +352,9 @@ def render_tab_content(active_tab):
                                     dcc.Dropdown(
                                         id='dd-bond-2s-id',
                                         options=[
-                                            {'label': i, 'value': i} for i in ctry_bond['FR']
+                                            {'label': i, 'value': i} for i in ctry_bond['GE']
                                         ],
-                                        #value='',
+                                        value=ctry_bond['GE'][1],
                                         clearable = False,
                                     )
                                 ],xs=12, sm=12, md=12, lg=9, xl=9),
@@ -311,7 +367,7 @@ def render_tab_content(active_tab):
                                     options=[
                                         {'label': i, 'value': i} for i in ctry
                                     ],
-                                    value='FR',
+                                    value='GE',
                                     clearable = False,
                                     ),
                                 ],xs=12, sm=12, md=12, lg=3, xl=3),
@@ -319,23 +375,29 @@ def render_tab_content(active_tab):
                                     dcc.Dropdown(
                                     id='dd-bond-2b-id',
                                     options=[
-                                        {'label': i, 'value': i} for i in ctry_bond['FR']
+                                        {'label': i, 'value': i} for i in ctry_bond['GE']
                                     ],
-                                    #value='',
+                                    value=ctry_bond['GE'][0],
                                     clearable = False,
                                     )
                                 ],xs=12, sm=12, md=12, lg=9, xl=9),
                             ]),
 
+                            dbc.Col(id="graph1-trade2-id"),
+                            dbc.Col(id="graph2-trade2-id")
+
                         ],xs=12, sm=12, md=12, lg=4, xl=4),
 
                         dbc.Col(['BOX TRADE',
-                            dbc.Col('Sell'),
                             dbc.Col('Trade 1'),
-                            dbc.Row('-'),
-                            dbc.Col('Buy'),
+                            dbc.Col('-------'),
+                            dbc.Col('+'),
                             dbc.Col('Trade 2'),
-                            dbc.Row('-'),
+                            dbc.Col('-------'),
+                            #dbc.Row('-'),
+
+                            dbc.Col(id="graph1-box-id"),
+                            dbc.Col(id="graph2-box-id")
                             
 
                         ],xs=12, sm=12, md=12, lg=4, xl=4),
@@ -347,9 +409,15 @@ def render_tab_content(active_tab):
             return  chld
 
 
+        elif active_tab == "aswCurve_id":   
+            chld =  [
+                dbc.Row(dbc.Col('ASW Curve change Analysis', className='h4'))
+            ]     
+            return  chld
+        
         elif active_tab == "c&r_id":   
             chld =  [
-                dbc.Row(dbc.Col('Carry & Roll-Down', className='h4'))
+                dbc.Row(dbc.Col('Carry & Roll-Down Analysis', className='h4'))
             ]     
             return  chld
         
@@ -369,3 +437,159 @@ def render_tab_content(active_tab):
     return "Select a sheet"
 
 
+#trade 1 - sell
+@app.callback(  
+    [   
+        Output("dd-bond-1s-id", "options"),
+       
+    ],  
+    [
+        Input("dd-ctry-1s-id", "value"),
+    ]
+)
+def dd_update(ctry):
+    res=[
+        {'label': i, 'value': i} for i in ctry_bond[ctry]
+    ],
+    return res
+
+#trade 1 - buy
+@app.callback(  
+    [   
+        Output("dd-bond-1b-id", "options"),
+       
+    ],  
+    [
+        Input("dd-ctry-1b-id", "value"),
+    ]
+)
+def dd_update(ctry):
+    res=[
+        {'label': i, 'value': i} for i in ctry_bond[ctry]
+    ],
+    return res
+
+#trade 2 - sell
+@app.callback(  
+    [   
+        Output("dd-bond-2s-id", "options"),
+       
+    ],  
+    [
+        Input("dd-ctry-2s-id", "value"),
+    ]
+)
+def dd_update(ctry):
+    res=[
+        {'label': i, 'value': i} for i in ctry_bond[ctry]
+    ],
+    return res
+
+#trade 2 - buy
+@app.callback(  
+    [   
+        Output("dd-bond-2b-id", "options"),
+       
+    ],  
+    [
+        Input("dd-ctry-2b-id", "value"),
+    ]
+)
+def dd_update(ctry):
+    res=[
+        {'label': i, 'value': i} for i in ctry_bond[ctry]
+    ],
+    return res
+
+
+#trade 1 - graph
+@app.callback(  
+    [   
+        Output("graph1-trade1-id", "children"),
+        Output("graph2-trade1-id", "children"),
+        
+
+
+       
+    ],  
+    [
+        Input("dd-ctry-1s-id", "value"),
+        Input("dd-bond-1s-id", "value"),
+        Input("dd-ctry-1b-id", "value"),
+        Input("dd-bond-1b-id", "value"),
+    ]
+)
+def graphs_update(ctry1s, bond1s,ctry1b, bond1b):
+    
+    df1s= df_dic[ctry1s].copy()
+    df1s = df1s[bond1s]
+    df1b= df_dic[ctry1b].copy()
+    df1b = df1b[bond1b]
+    
+    res1 = trade_graph(df1s,df1b)['dcc_asw']
+    res2 = trade_graph(df1s,df1b)['dcc_spread']
+  
+    return res1, res2
+
+
+#trade 2 - graph
+@app.callback(  
+    [   
+        Output("graph1-trade2-id", "children"),
+        Output("graph2-trade2-id", "children"),
+               
+    ],  
+    [
+        Input("dd-ctry-2s-id", "value"),
+        Input("dd-bond-2s-id", "value"),
+        Input("dd-ctry-2b-id", "value"),
+        Input("dd-bond-2b-id", "value"),
+    ]
+)
+def graphs_update(ctry2s, bond2s,ctry2b, bond2b):
+    
+    df2s= df_dic[ctry2s].copy()
+    df2s = df2s[bond2s]
+    df2b= df_dic[ctry2b].copy()
+    df2b = df2b[bond2b]
+    
+    res1 = trade_graph(df2s,df2b)['dcc_asw']
+    res2 = trade_graph(df2s,df2b)['dcc_spread']
+  
+    return res1, res2
+
+
+#trade 2 - graph
+@app.callback(  
+    [   
+        Output("graph1-box-id", "children"),
+        Output("graph2-box-id", "children"),
+               
+    ],  
+    [
+        Input("dd-ctry-1s-id", "value"),
+        Input("dd-bond-1s-id", "value"),
+        Input("dd-ctry-1b-id", "value"),
+        Input("dd-bond-1b-id", "value"),
+        Input("dd-ctry-2s-id", "value"),
+        Input("dd-bond-2s-id", "value"),
+        Input("dd-ctry-2b-id", "value"),
+        Input("dd-bond-2b-id", "value"),
+    ]
+)
+def graphs_update(ctry1s, bond1s,ctry1b, bond1b,ctry2s, bond2s,ctry2b, bond2b):
+    
+    df1s= df_dic[ctry1s].copy()
+    df1s = df1s[bond1s]
+    df1b= df_dic[ctry1b].copy()
+    df1b = df1b[bond1b]
+    
+    df2s= df_dic[ctry2s].copy()
+    df2s = df2s[bond2s]
+    df2b= df_dic[ctry2b].copy()
+    df2b = df2b[bond2b]
+    
+    res1 = box_graph(df1s,df1b,df2s,df2b)['dcc_spread']
+    res2 = box_graph(df1s,df1b,df2s,df2b)['dcc_box']
+  
+    return res1, res2

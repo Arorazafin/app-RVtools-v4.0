@@ -13,7 +13,7 @@ layout = dbc.Container([
                 dbc.Col(" EUR markets (demo)", className="h1 text-center")
             ]),
             dbc.Row([
-                dbc.Col("RV Tools - digital version v2.0", className="h2 text-center")
+                dbc.Col("RV Tools - digital version v4.0", className="h2 text-center")
             ]),
             html.Br(),
             dbc.Row([
