@@ -43,7 +43,7 @@ layout = dbc.Container([
                 ],xs=12, sm=6, md=6, lg=3, xl=3),
                 dbc.Col([
                     dbc.Card(
-                        dbc.Button("Inflation Anlaysis",href="/inflation",color="primary"),
+                        dbc.Button("Inflation Analysis",href="/inflation",color="primary"),
                         body=True, 
                         color="dark", 
                         outline=True
