@@ -35,4 +35,4 @@ auth = dash_auth.BasicAuth(
 
 
 app.config.suppress_callback_exceptions = True
-app.title = "rvtools-v2 (demo)"
+app.title = "rvtools-v4 (demo)"
