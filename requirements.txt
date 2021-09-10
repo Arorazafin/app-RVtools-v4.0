@@ -1,5 +1,5 @@
 #dash
-dash
+dash==2.0.0
 dash-bootstrap-components
 dash-auth
 
