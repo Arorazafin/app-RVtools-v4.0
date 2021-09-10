@@ -40,5 +40,3 @@ services:
 #        driver: bridge
 
 
-## docker exec -it car-app_web bash
-## docker-compose exec app_web bash

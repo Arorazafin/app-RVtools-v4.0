@@ -2,12 +2,14 @@
 # Dash package
 from pandas.io.sql import has_table
 import dash
+from dash import dcc
+from dash import html
+from dash import dash_table
+
 from dash.dependencies import Input, Output
-import dash_core_components as dcc
 import dash_bootstrap_components as dbc
+
 import plotly.graph_objs as go
-import dash_html_components as html
-import dash_table
 from plotly.subplots import make_subplots
 
 # standard package
@@ -126,7 +128,7 @@ df_dic ['GE'] = df_ge
 df_dic ['IT'] = df_it
 
 
-print(ctry_bond)
+#print(ctry_bond)
 
 
 def trade_graph(df1,df2):
